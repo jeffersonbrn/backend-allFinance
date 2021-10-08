@@ -1,0 +1,245 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model accountants {
+  id                 Int       @id @default(autoincrement())
+  companies_id       Int
+  name               String    @db.VarChar
+  cpf                String    @db.VarChar
+  phone              String?   @db.VarChar
+  email              String    @db.VarChar
+  endereco           String?   @db.VarChar
+  numero             String?   @db.VarChar
+  complemento        String?   @db.VarChar
+  bairro             String?   @db.VarChar
+  cidade             String?   @db.VarChar
+  uf                 String?   @db.VarChar
+  crc                String    @db.VarChar
+  path_certificate_1 String?   @db.VarChar
+  path_certificate_2 String?   @db.VarChar
+  path_certificate_3 String?   @db.VarChar
+  path_doc_1         String?   @db.VarChar
+  path_doc_2         String?   @db.VarChar
+  path_doc_3         String?   @db.VarChar
+  active             Boolean   @default(true)
+  created            DateTime? @default(now()) @db.Timestamptz(6)
+  modified           DateTime? @default(now()) @db.Timestamptz(6)
+  companies          companies @relation(fields: [companies_id], references: [id])
+  clients            clients[]
+}
+
+model clients {
+  id                            Int                        @id @default(autoincrement())
+  companies_id                  Int?
+  razao_social                  String?                    @db.VarChar
+  cnpj                          String?                    @db.VarChar
+  internal_control_number       String?                    @db.VarChar
+  rua                           String?                    @db.VarChar
+  numero                        String?                    @db.VarChar
+  complemento                   String?                    @db.VarChar
+  bairro                        String?                    @db.VarChar
+  municipio                     String?                    @db.VarChar
+  uf                            String?                    @db.VarChar
+  cep                           String?                    @db.VarChar
+  phone                         String?                    @db.VarChar
+  email                         String?                    @db.VarChar
+  accountant_id                 Int?
+  director_id                   Int?
+  pj_qualification_id           Int?
+  pj_forms_of_taxation_id       Int?
+  pj_pis_confins_calculation_id Int?
+  inscricao_estadual            String?                    @db.VarChar
+  inscricao_municipal           String?                    @db.VarChar
+  pj_activity_type_id           Int?
+  active                        Boolean?
+  created                       DateTime?                  @default(now()) @db.Timestamptz(6)
+  modified                      DateTime?                  @default(now()) @db.Timestamptz(6)
+  accountants                   accountants?               @relation(fields: [accountant_id], references: [id])
+  companies                     companies?                 @relation(fields: [companies_id], references: [id])
+  directors                     directors?                 @relation(fields: [director_id], references: [id])
+  pj_activity_type              pj_activity_type?          @relation(fields: [pj_activity_type_id], references: [id])
+  pj_forms_of_taxation          pj_forms_of_taxation?      @relation(fields: [pj_forms_of_taxation_id], references: [id])
+  pj_pis_cofins_calculation     pj_pis_cofins_calculation? @relation(fields: [pj_pis_confins_calculation_id], references: [id])
+  pj_qualifications             pj_qualifications?         @relation(fields: [pj_qualification_id], references: [id])
+  jobs                          jobs[]
+  users_has_clients             users_has_clients[]
+}
+
+model companies {
+  id                    Int                     @id @default(autoincrement())
+  name                  String?                 @db.VarChar
+  number_users          Int?
+  image                 String?                 @db.VarChar
+  resale_plans_id       Int?
+  active                Boolean?
+  created               DateTime?               @default(now()) @db.Timestamptz(6)
+  modified              DateTime?               @default(now()) @db.Timestamptz(6)
+  razao_social          String?                 @db.VarChar
+  cnpj                  String?                 @db.VarChar
+  endereco              String?                 @db.VarChar
+  telefone              String?                 @db.VarChar
+  numero_endereco       String?                 @db.VarChar
+  bairro                String?                 @db.VarChar
+  cidade                String?                 @db.VarChar
+  cep                   String?                 @db.VarChar
+  uf                    String?                 @db.VarChar
+  pais                  String?                 @db.VarChar
+  resale_plans          resale_plans?           @relation(fields: [resale_plans_id], references: [id])
+  accountants           accountants[]
+  clients               clients[]
+  directors             directors[]
+  modules_has_companies modules_has_companies[]
+  users                 users[]
+}
+
+model directors {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar
+  cpf          String    @db.VarChar
+  phone        String?   @db.VarChar
+  email        String?   @db.VarChar
+  active       Boolean   @default(true)
+  companies_id Int
+  created      DateTime? @default(now()) @db.Timestamptz(6)
+  modified     DateTime? @default(now()) @db.Timestamptz(6)
+  companies    companies @relation(fields: [companies_id], references: [id])
+  clients      clients[]
+}
+
+model jobs {
+  id              Int       @id @default(autoincrement())
+  type_process    String    @db.VarChar
+  instructions    Json
+  status          String    @default("START") @db.VarChar
+  fail            Boolean   @default(false)
+  last_time_run   DateTime? @db.Timestamptz(6)
+  processing_date DateTime? @db.Timestamptz(6)
+  clients_id      Int
+  created         DateTime? @default(now()) @db.Timestamptz(6)
+  modified        DateTime? @default(now()) @db.Timestamptz(6)
+  user_created_id Int       @default(autoincrement())
+  obs             String?
+  clients         clients   @relation(fields: [clients_id], references: [id])
+  users           users     @relation(fields: [user_created_id], references: [id])
+}
+
+model modules {
+  id                    Int                     @id @default(autoincrement())
+  name                  String?                 @db.VarChar
+  created               DateTime?               @default(now()) @db.Timestamp(6)
+  modified              DateTime?               @default(now()) @db.Timestamp(6)
+  icon                  String?                 @db.VarChar
+  active                Boolean?                @default(true)
+  modules_has_companies modules_has_companies[]
+}
+
+model modules_has_companies {
+  id           Int        @id @default(autoincrement())
+  companies_id Int?
+  modules_id   Int?
+  created      DateTime?  @default(now()) @db.Timestamp(6)
+  modified     DateTime?  @default(now()) @db.Timestamp(6)
+  companies    companies? @relation(fields: [companies_id], references: [id])
+  modules      modules?   @relation(fields: [modules_id], references: [id])
+}
+
+model pj_activity_type {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar
+  active   Boolean   @default(true)
+  created  DateTime? @default(now()) @db.Timestamptz(6)
+  modified DateTime? @default(now()) @db.Timestamptz(6)
+  clients  clients[]
+}
+
+model pj_forms_of_taxation {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar
+  active   Boolean   @default(true)
+  created  DateTime? @default(now()) @db.Timestamptz(6)
+  modified DateTime? @default(now()) @db.Timestamptz(6)
+  clients  clients[]
+}
+
+model pj_pis_cofins_calculation {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar
+  active   Boolean   @default(true)
+  created  DateTime? @default(now()) @db.Timestamptz(6)
+  modified DateTime? @default(now()) @db.Timestamptz(6)
+  clients  clients[]
+}
+
+model pj_qualifications {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar
+  active   Boolean   @default(true)
+  created  DateTime? @default(now()) @db.Timestamptz(6)
+  modified DateTime? @default(now()) @db.Timestamptz(6)
+  clients  clients[]
+}
+
+model resale_plans {
+  id        Int         @id @default(autoincrement())
+  name      String?     @db.VarChar
+  slug      String?     @db.VarChar
+  active    Boolean?
+  clientes  Int?
+  value     Decimal?    @db.Decimal(19, 2)
+  created   DateTime?   @default(now()) @db.Time(6)
+  modified  DateTime?   @default(now()) @db.Time(6)
+  companies companies[]
+}
+
+model users {
+  id                Int                 @id @default(autoincrement())
+  email             String              @db.VarChar(255)
+  password          String              @db.VarChar(255)
+  cpf               String?             @db.VarChar(11)
+  created           DateTime            @default(now())
+  modified          DateTime            @default(now())
+  users_types_id    Int?
+  companies_id      Int?
+  image_path        String?             @db.VarChar
+  active            Boolean?            @default(true)
+  name              String?             @db.VarChar
+  companies         companies?          @relation(fields: [companies_id], references: [id])
+  users_types       users_types?        @relation(fields: [users_types_id], references: [id])
+  jobs              jobs[]
+  users_has_clients users_has_clients[]
+  activeSession     activeSession[]
+}
+
+model users_has_clients {
+  id         Int       @id @default(autoincrement())
+  users_id   Int
+  clients_id Int
+  created    DateTime? @default(now()) @db.Timestamptz(6)
+  modified   DateTime? @default(now()) @db.Timestamptz(6)
+  clients    clients   @relation(fields: [clients_id], references: [id])
+  users      users     @relation(fields: [users_id], references: [id])
+}
+
+model users_types {
+  id       Int       @id @default(autoincrement())
+  type     String?   @db.VarChar
+  active   Boolean?
+  public   Boolean?
+  created  DateTime? @default(now()) @db.Timestamp(6)
+  modified DateTime? @default(now()) @db.Timestamp(6)
+  users    users[]
+}
+
+model activeSession {
+  id     Int      @id @default(autoincrement())
+  token  String
+  userId Int
+  users  users    @relation(fields: [userId], references: [id])
+  date   DateTime @default(now())
+}
